@@ -1,0 +1,232 @@
+# Codeforces Rating Crawler — 使用文档
+
+## 一、项目简介
+
+`cf_crawler` 是一个命令行工具，调用 [Codeforces API](https://codeforces.com/apiHelp) 获取用户数据，生成包含 Rating 曲线、难度直方图、比赛详情的交互式 HTML 页面。
+
+**核心能力**：输入 CF 用户名 → 自动拉取数据 → 生成可视化页面。
+
+---
+
+## 二、运行环境
+
+| 需求       | 说明                                   |
+| ---------- | -------------------------------------- |
+| 操作系统   | Windows 64-bit                         |
+| 运行时依赖 | `libcurl-x64.dll`（与 exe 同目录即可） |
+| 网络       | 可访问 `https://codeforces.com/api/`   |
+
+---
+
+## 三、快速开始
+
+### 1. 下载 / 解压
+
+将以下文件放在同一目录：
+
+```
+cf_crawler.exe
+libcurl-x64.dll
+template.html
+```
+
+### 2. 运行（单用户）
+
+```powershell
+.\cf_crawler.exe tourist
+```
+
+生成文件：
+
+- `data.js` — 用户数据（JSON）
+- `index.html` — 可视化页面（可用浏览器直接打开）
+
+### 3. 查看结果
+
+双击 `index.html`，浏览器中即可看到：
+
+- 用户信息卡片（头像、等级分、头衔）
+- Rating 变化曲线（ECharts 折线图）
+- 难度直方图（4 时段 tab 切换）
+- 比赛详情表格（排名、分差、每题通过状态）
+
+---
+
+## 四、三种运行模式
+
+### 模式一：单用户
+
+```powershell
+.\cf_crawler.exe <handle>
+```
+
+示例：
+
+```powershell
+.\cf_crawler.exe tourist
+```
+
+输出：`data.js` + `index.html`
+
+---
+
+### 模式二：多用户（命令行参数）
+
+```powershell
+.\cf_crawler.exe <handle1> <handle2> <handle3> ...
+```
+
+示例：
+
+```powershell
+.\cf_crawler.exe tourist Petr Benq
+```
+
+输出：
+
+- `tourist_data.js` + `tourist.html`
+- `Petr_data.js` + `Petr.html`
+- `Benq_data.js` + `Benq.html`
+- `index.html` — 多用户列表页
+
+---
+
+### 模式三：从文件批量读取
+
+```powershell
+.\cf_crawler.exe <文件名.txt>
+```
+
+文件格式（每行一个 handle，支持 `#` 注释和空行）：
+
+```
+# 我的关注列表
+tourist
+Petr
+Benq
+Gennady
+```
+
+示例：
+
+```powershell
+.\cf_crawler.exe users.txt
+```
+
+输出与「模式二」相同。
+
+---
+
+## 五、输出的 HTML 页面说明
+
+### 个人页面（如 `tourist.html`）
+
+| 区域        | 内容                                                         |
+| ----------- | ------------------------------------------------------------ |
+| 顶部卡片    | 头像、昵称（CF 等级分色）、当前分 / 最高分 / 总场次 / 近 180 天场次 |
+| Rating 曲线 | ECharts 折线图，节点按对应等级分色着色，最高分 ⭐ 金色标记    |
+| 难度直方图  | 4 时段 tab（全部 / 365天 / 180天 / 30天），X 轴难度区间，Y 轴通过题数 |
+| 比赛表格    | 日期、赛事名、排名、分差、各题状态（绿=通过 红=失败 灰=未做）、补题列表 |
+
+### 列表页（多用户模式 `index.html`）
+
+| 功能     | 说明                                                      |
+| -------- | --------------------------------------------------------- |
+| 统计卡片 | 用户数、总场次、全场最高 Max Rating                       |
+| 用户表格 | 头像、昵称、Rating、Max、Rank、Contests、180天场次/最高分 |
+| 排序     | 点击表头按列排序                                          |
+| 跳转     | 点击行跳转对应用户的详情页                                |
+
+---
+
+## 六、从源码编译
+
+### 环境要求
+
+| 工具           | 版本                   |
+| -------------- | ---------------------- |
+| MinGW-w64 GCC  | 8.1.0+                 |
+| GNU Make       | 3.81+                  |
+| libcurl 开发包 | 8.x（头文件 + 静态库） |
+
+### 编译步骤
+
+```powershell
+# 1. 进入源码目录
+cd D:\codeforce\Script
+
+# 2. 编译
+mingw32-make all
+
+# 3. 运行测试
+mingw32-make test
+
+# 4. 打包分发
+mingw32-make dist
+```
+
+### Makefile 目标
+
+| 目标    | 说明                                |
+| ------- | ----------------------------------- |
+| `all`   | 编译 `cf_crawler.exe`               |
+| `test`  | 用 `tourist` 运行一次测试           |
+| `clean` | 清理编译产物和生成文件              |
+| `dist`  | 打包 exe + dll + template → `dist/` |
+
+---
+
+## 七、常见问题
+
+**Q: 双击 exe 一闪而过？**
+A: 这是一个命令行工具，需要在 PowerShell / CMD 中带参数运行，不能直接双击。
+
+**Q: 提示 "libcurl-x64.dll 缺失"？**
+A: 将 `libcurl-x64.dll` 放入 `cf_crawler.exe` 所在目录。
+
+**Q: 网络超时或请求失败？**
+A: Codeforces API 有频率限制。单次超时设为 30s，如失败可稍等重试。建议每次拉取不要超过 5 个用户。
+
+**Q: 生成的 HTML 打不开 / 图表不显示？**
+A: 图表依赖 CDN 加载 ECharts，需要网络连接。确保浏览器能访问 `cdn.jsdelivr.net`。
+
+**Q: 某个 handle 拉取失败？**
+A: 检查 handle 拼写是否正确（区分大小写），或网络是否正常。多用户模式下单个失败不影响其他用户。
+
+---
+
+## 八、限制说明
+
+- 单次 `user.status` 最多拉取 200 条提交，对于提交量极大的用户（＞5000 题）可能丢失旧数据
+- 所有数据来源于 Codeforces API，生成 HTML 时不具备实时更新能力——如需更新需重新运行
+- 偶尔遇到 CF API 503 时需稍等后重试
+
+---
+
+## 九、项目文件结构
+
+```
+D:\codeforce\
+├── Script\                 # 源码目录
+│   ├── main.c              # 程序入口（模式判断 + 调度）
+│   ├── http_client.c/.h    # libcurl HTTP 封装
+│   ├── cf_api.c/.h         # Codeforces API 调用
+│   ├── analyzer.c/.h       # 数据分析 + JS 导出
+│   ├── data_model.c/.h     # 数据结构定义
+│   ├── utils.c/.h          # 工具函数（颜色/等级）
+│   ├── cJSON.c/.h          # JSON 解析库（第三方）
+│   ├── template.html       # 前端页面模板
+│   ├── Makefile            # 编译脚本
+│   ├── cf_crawler.exe      # 编译产物
+│   └── libcurl-x64.dll     # 运行时依赖
+├── 要求.md                 # 原始需求
+├── 架构.md                 # 工程架构
+├── 设计文档.md             # 设计文档
+├── 使用文档.md             # 本文件
+├── log.md                  # 开发日志
+└── users.txt               # 用户列表示例
+```
+
+---
+
+> 生成日期：2026-05-23
