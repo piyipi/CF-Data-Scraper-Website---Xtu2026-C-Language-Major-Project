@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Codeforces Rating Viewer</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+/* ===== DESIGN SYSTEM TOKENS ===== */
+:root {
+  --bg-deep: #0f0f1a;
+  --bg-primary: #1a1a2e;
+  --bg-secondary: #16213e;
+  --bg-card: rgba(255, 255, 255, 0.035);
+  --bg-card-hover: rgba(255, 255, 255, 0.06);
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-card: rgba(255, 255, 255, 0.10);
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0b8;
+  --text-muted: #6c6c80;
+  --font-mono: 'Consolas', 'SF Mono', 'Fira Code', 'Liberation Mono', monospace;
+  --font-body: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
+  --transition-fast: 150ms ease;
+  --transition-smooth: 250ms ease;
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+  --color-newbie: #808080;
+  --color-pupil: #008000;
+  --color-specialist: #03A89E;
+  --color-expert: #0000FF;
+  --color-cm: #AA00AA;
+  --color-master: #FF8C00;
+  --color-im: #FF0000;
+  --color-gm: #CC0000;
+  --color-positive: #00c853;
+  --color-negative: #ff1744;
+}
+
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  line-height: 1.5;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(204, 0, 0, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 100%, rgba(3, 168, 158, 0.05) 0%, transparent 50%);
+}
+
+/* ===== LAYOUT ===== */
+.page { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+@media (max-width: 768px) { .page { padding: 0 16px; } }
+@media (max-width: 480px) { .page { padding: 0 12px; } }
+
+/* ===== TITLE BAR ===== */
+.title-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 28px 0 24px;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 32px;
+}
+.title-logo {
+  width: 40px; height: 40px;
+  background: linear-gradient(135deg, #E53935 25%, #FDD835 25%, #FDD835 50%, #E53935 50%, #E53935 75%, #FDD835 75%);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 20px; font-weight: 700;
+  color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  flex-shrink: 0;
+}
+.title-text { font-size: 24px; font-weight: 700; letter-spacing: -0.3px; }
+@media (max-width: 480px) {
+  .title-bar { padding: 20px 0 16px; margin-bottom: 24px; }
+  .title-text { font-size: 18px; }
+  .title-logo { width: 34px; height: 34px; font-size: 16px; }
+}
+
+/* ===== USER CARD ===== */
+.user-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 28px 32px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--glass-shadow);
+  margin-bottom: 28px;
+  transition: border-color var(--transition-smooth), box-shadow var(--transition-smooth);
+}
+.user-card:hover {
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: var(--shadow-md);
+}
+.user-avatar {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--border-card);
+  flex-shrink: 0;
+  background: var(--bg-secondary);
+}
+.user-info { min-width: 0; }
+.user-handle { font-size: 28px; font-weight: 700; line-height: 1.2; word-break: break-all; }
+.user-rank { font-size: 15px; color: var(--text-secondary); margin-top: 2px; }
+.user-rating {
+  font-family: var(--font-mono);
+  font-size: 17px;
+  margin-top: 6px;
+  display: flex; align-items: center; gap: 8px;
+}
+.user-rating-val { font-weight: 700; }
+.user-rating-max { color: var(--text-muted); font-size: 14px; }
+
+@media (max-width: 480px) {
+  .user-card { padding: 20px; gap: 14px; }
+  .user-avatar { width: 60px; height: 60px; }
+  .user-handle { font-size: 20px; }
+  .user-rank { font-size: 13px; }
+  .user-rating { font-size: 14px; flex-wrap: wrap; }
+}
+
+/* ===== STATS ROW ===== */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+.stat-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  backdrop-filter: blur(12px);
+  box-shadow: var(--glass-shadow);
+  text-align: center;
+  transition: transform var(--transition-fast), border-color var(--transition-smooth), box-shadow var(--transition-smooth);
+}
+.stat-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.16);
+  box-shadow: var(--shadow-md);
+}
+.stat-label { font-size: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+.stat-value { font-family: var(--font-mono); font-size: 32px; font-weight: 700; line-height: 1.2; }
+.stat-sub { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+
+@media (max-width: 768px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .stat-value { font-size: 26px; }
+}
+@media (max-width: 480px) {
+  .stats-row { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .stat-card { padding: 16px 14px; }
+  .stat-value { font-size: 22px; }
+}
+
+/* ===== CHART SECTION ===== */
+.chart-section {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  backdrop-filter: blur(12px);
+  box-shadow: var(--glass-shadow);
+  margin-bottom: 28px;
+}
+.chart-header { font-size: 16px; font-weight: 600; margin-bottom: 8px; color: var(--text-primary); }
+.chart-container { width: 100%; height: 400px; }
+@media (max-width: 768px) { .chart-container { height: 320px; } }
+@media (max-width: 480px) { .chart-container { height: 260px; } .chart-section { padding: 16px; } }
+
+/* ===== HISTOGRAM TABS ===== */
+.histogram-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.histogram-tab {
+  padding: 8px 18px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  background: var(--glass-bg);
+  color: var(--text-secondary);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  transition: all var(--transition-fast);
+  backdrop-filter: blur(8px);
+}
+.histogram-tab:hover {
+  background: rgba(255,255,255,0.08);
+  color: var(--text-primary);
+}
+.histogram-tab.active {
+  background: rgba(255,71,87,0.2);
+  border-color: rgba(255,71,87,0.5);
+  color: #ff4757;
+  font-weight: 600;
+}
+
+/* ===== TABLE SECTION ===== */
+.table-section {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--glass-shadow);
+  margin-bottom: 28px;
+  overflow: hidden;
+}
+.table-header {
+  padding: 20px 24px;
+  font-size: 16px; font-weight: 600;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.table-wrapper { overflow-x: auto; }
+.table-wrapper::-webkit-scrollbar { height: 6px; }
+.table-wrapper::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.10); border-radius: 3px; }
+.table-wrapper::-webkit-scrollbar-track { background: transparent; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  font-family: var(--font-mono);
+}
+thead th {
+  background: rgba(0,0,0,0.25);
+  padding: 12px 14px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  white-space: nowrap;
+  border-bottom: 2px solid var(--border-subtle);
+}
+tbody td {
+  padding: 11px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  white-space: nowrap;
+}
+tbody tr:nth-child(even) { background: rgba(255, 255, 255, 0.015); }
+tbody tr:hover { background: rgba(255, 255, 255, 0.04); }
+tbody tr { transition: background var(--transition-fast); }
+
+.change-positive { color: var(--color-positive); font-weight: 700; }
+.change-negative { color: var(--color-negative); font-weight: 700; }
+.rank-badge { font-weight: 700; }
+
+/* Problem badges */
+.problem-badges { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; }
+.problem-badge {
+  display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+  width: 28px; height: 30px;
+  border-radius: 4px;
+  font-size: 12px; font-weight: 700;
+  font-family: var(--font-mono);
+  line-height: 1.1;
+  transition: transform var(--transition-fast);
+  position: relative;
+}
+.problem-badge:hover { transform: scale(1.15); z-index: 2; }
+.problem-badge .badge-score {
+  font-size: 8px; font-weight: 500; opacity: 0.7; line-height: 1;
+}
+.problem-badge.solved { background: #0a3d1a; color: #4caf50; border: 1px solid #1b5e20; }
+.problem-badge.solved .badge-score { color: #66bb6a; }
+.problem-badge.failed { background: #3d0a0a; color: #ef5350; border: 1px solid #5e1b1b; }
+.problem-badge.failed .badge-score { color: #ef9a9a; }
+.problem-badge.empty { background: transparent; color: var(--text-muted); border: 1px dashed rgba(255,255,255,0.1); }
+.problem-badge.empty .badge-score { display: none; }
+
+/* Upsolved badges */
+.upsolved-list { display: flex; gap: 4px; flex-wrap: wrap; }
+.upsolved-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px;
+  border-radius: 3px;
+  font-size: 10px; font-weight: 600;
+  font-family: var(--font-mono);
+  background: #0a2a3d; color: #4fc3f7; border: 1px solid #0d47a1;
+  transition: transform var(--transition-fast);
+}
+.upsolved-badge:hover { transform: scale(1.12); }
+.upsolved-none { color: #555; font-size: 13px; }
+.contest-name-cell { max-width: 280px; white-space: normal; word-break: break-word; font-family: var(--font-body); font-size: 12px; }
+
+@media (max-width: 768px) {
+  table { font-size: 11px; }
+  thead th, tbody td { padding: 8px 10px; }
+  .problem-badge { width: 22px; height: 24px; font-size: 10px; border-radius: 3px; }
+  .problem-badge .badge-score { font-size: 7px; }
+  .upsolved-badge { width: 18px; height: 18px; font-size: 9px; }
+}
+@media (max-width: 480px) {
+  table { font-size: 10px; }
+  thead th, tbody td { padding: 7px 8px; }
+  .problem-badge { width: 18px; height: 20px; font-size: 9px; border-radius: 3px; }
+  .problem-badge .badge-score { font-size: 6px; }
+  .upsolved-badge { width: 16px; height: 16px; font-size: 8px; }
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+  text-align: center; padding: 48px 24px;
+  color: var(--text-muted);
+}
+.empty-state-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.4; }
+.empty-state-text { font-size: 15px; }
+
+/* ===== FOOTER ===== */
+.footer {
+  text-align: center;
+  padding: 28px 24px 36px;
+  color: var(--text-muted);
+  font-size: 12px;
+  border-top: 1px solid var(--border-subtle);
+  margin-top: 8px;
+}
+.footer-link { color: var(--text-secondary); text-decoration: none; transition: color var(--transition-fast); }
+.footer-link:hover { color: var(--text-primary); }
+
+/* ===== UTILITY ===== */
+.text-mono { font-family: var(--font-mono); }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Title Bar -->
+  <div class="title-bar">
+    <div class="title-logo">CF</div>
+    <div class="title-text">Codeforces Rating Viewer</div>
+  </div>
+
+  <!-- User Card -->
+  <div id="user-card" class="user-card">
+    <!-- filled by JS -->
+  </div>
+
+  <!-- Stats Row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-label">Current Rating</div>
+      <div id="stat-current" class="stat-value">---</div>
+      <div class="stat-sub" id="stat-rank">--</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Max Rating</div>
+      <div id="stat-max" class="stat-value">---</div>
+      <div class="stat-sub">All Time</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Contests</div>
+      <div id="stat-contests" class="stat-value">---</div>
+      <div class="stat-sub">Participated</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Recent 180 Days</div>
+      <div id="stat-recent" class="stat-value">---</div>
+      <div id="stat-recent-max" class="stat-sub">Max: ---</div>
+    </div>
+  </div>
+
+  <!-- Chart -->
+  <div class="chart-section">
+    <div class="chart-header">Rating History</div>
+    <div id="chart-container" class="chart-container"></div>
+    <div id="chart-empty" class="empty-state" style="display:none;">
+      <div class="empty-state-icon">&#9783;</div>
+      <div class="empty-state-text">No rating history available yet.</div>
+    </div>
+  </div>
+
+  <!-- Difficulty Histogram -->
+  <div class="chart-section">
+    <div class="chart-header">Problem Difficulty Distribution</div>
+    <div class="histogram-tabs" id="histogram-tabs">
+      <button class="histogram-tab active" data-period="0">All Time</button>
+      <button class="histogram-tab" data-period="1">365 Days</button>
+      <button class="histogram-tab" data-period="2">180 Days</button>
+      <button class="histogram-tab" data-period="3">30 Days</button>
+    </div>
+    <div id="histogram-container" class="chart-container"></div>
+    <div id="histogram-empty" class="empty-state" style="display:none;">
+      <div class="empty-state-icon">&#9776;</div>
+      <div class="empty-state-text">No problem difficulty data available.</div>
+    </div>
+  </div>
+
+  <!-- Contest History Table -->
+  <div class="table-section">
+    <div class="table-header">Contest History</div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Contest</th>
+            <th>Rank</th>
+            <th>Old</th>
+            <th>New</th>
+            <th>Change</th>
+            <th>Problems</th>
+            <th>Upsolved</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          <!-- filled by JS -->
+        </tbody>
+      </table>
+    </div>
+    <div id="table-empty" class="empty-state" style="display:none;">
+      <div class="empty-state-icon">&#9776;</div>
+      <div class="empty-state-text">No contest history available.</div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    Powered by <a class="footer-link" href="https://codeforces.com" target="_blank" rel="noopener">Codeforces API</a>
+    <span id="footer-ts" style="margin-left: 12px;"></span>
+  </div>
+
+</div>
+
+<script>
+  // 根据 HTML 文件名动态推导对应数据文件名：
+  //  index.html  →  data.js (单用户模式)
+  //  {handle}.html → {handle}_data.js (多用户/交互模式)
+  (function(){var n=window.location.pathname.split('/').pop().replace('.html','');
+  var js=n==='index'||n===''?'data.js':n+'_data.js';
+  document.write('<script src="'+js+'"><\/script>');})();
+</script>
+<script>
+(function() {
+  'use strict';
+
+  // ---- Validate data ----
+  if (typeof CF_DATA === 'undefined') {
+    console.warn('CF_DATA not defined. data.js may not have loaded.');
+    return;
+  }
+  var D = CF_DATA;
+
+  // ---- Color helpers ----
+  function getRatingColor(rating) {
+    if (rating < 1200) return '#808080';
+    if (rating < 1400) return '#008000';
+    if (rating < 1600) return '#03A89E';
+    if (rating < 1900) return '#0000FF';
+    if (rating < 2100) return '#AA00AA';
+    if (rating < 2300) return '#FF8C00';
+    if (rating < 2400) return '#FF0000';
+    return '#CC0000';
+  }
+
+  function lerpColor(c1, c2, t) {
+    var r1 = parseInt(c1.slice(1,3), 16);
+    var g1 = parseInt(c1.slice(3,5), 16);
+    var b1 = parseInt(c1.slice(5,7), 16);
+    var r2 = parseInt(c2.slice(1,3), 16);
+    var g2 = parseInt(c2.slice(3,5), 16);
+    var b2 = parseInt(c2.slice(5,7), 16);
+    var r = Math.round(r1 + (r2 - r1) * t);
+    var g = Math.round(g1 + (g2 - g1) * t);
+    var b = Math.round(b1 + (b2 - b1) * t);
+    return '#' + ((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1);
+  }
+
+  function hexToRgb(hex) {
+    var r = parseInt(hex.slice(1,3), 16);
+    var g = parseInt(hex.slice(3,5), 16);
+    var b = parseInt(hex.slice(5,7), 16);
+    return { r: r, g: g, b: b };
+  }
+
+  function formatDate(ts) {
+    var d = new Date(ts * 1000);
+    var y = d.getFullYear();
+    var m = String(d.getMonth() + 1).padStart(2, '0');
+    var day = String(d.getDate()).padStart(2, '0');
+    return y + '-' + m + '-' + day;
+  }
+
+  // ---- Render User Card ----
+  function renderUserCard() {
+    var card = document.getElementById('user-card');
+    var handleColor = D.color || getRatingColor(D.rating);
+    var bgRgb = hexToRgb(handleColor);
+    var gradient = 'linear-gradient(135deg, '
+      + 'rgba(' + bgRgb.r + ',' + bgRgb.g + ',' + bgRgb.b + ',0.08) 0%, '
+      + 'rgba(' + bgRgb.r + ',' + bgRgb.g + ',' + bgRgb.b + ',0.02) 100%)';
+
+    card.style.background = gradient + ', ' + getComputedStyle(card).background;
+
+    card.innerHTML =
+      '<img class="user-avatar" src="' + (D.avatar || '') + '" alt="' + (D.handle || '') + '"'
+      + ' onerror="this.style.display=\'none\'">'
+      + '<div class="user-info">'
+      +   '<div class="user-handle" style="color:' + handleColor + '">' + (D.handle || 'Unknown') + '</div>'
+      +   '<div class="user-rank">' + (D.rank || 'Unrated') + '</div>'
+      +   '<div class="user-rating">'
+      +     '<span class="user-rating-val" style="color:' + handleColor + '">' + formatNum(D.rating) + '</span>'
+      +     '<span class="user-rating-max">(max: ' + formatNum(D.maxRating) + ')</span>'
+      +   '</div>'
+      + '</div>';
+  }
+
+  function formatNum(n) { return (n != null) ? n.toLocaleString() : '---'; }
+
+  // ---- Render Stats ----
+  function renderStats() {
+    var handleColor = D.color || getRatingColor(D.rating);
+    document.getElementById('stat-current').textContent = formatNum(D.rating);
+    document.getElementById('stat-current').style.color = handleColor;
+    document.getElementById('stat-rank').textContent = D.rank || 'Unrated';
+    document.getElementById('stat-max').textContent = formatNum(D.maxRating);
+    document.getElementById('stat-contests').textContent = formatNum(D.contestCount);
+    document.getElementById('stat-recent').textContent = formatNum(D.recentCount180d);
+    document.getElementById('stat-recent-max').textContent = 'Max: ' + formatNum(D.recentMaxRating180d);
+  }
+
+  // ---- Render Chart ----
+  function renderChart() {
+    var history = D.ratingHistory || [];
+    var chartDom = document.getElementById('chart-container');
+    var emptyEl = document.getElementById('chart-empty');
+
+    if (!history.length) {
+      chartDom.style.display = 'none';
+      emptyEl.style.display = 'block';
+      return;
+    }
+
+    chartDom.style.display = 'block';
+    emptyEl.style.display = 'none';
+
+    // Sort oldest first for chart
+    var sorted = history.slice().sort(function(a, b) { return a.time - b.time; });
+
+    var dates = sorted.map(function(item) { return formatDate(item.time); });
+    var ratings = sorted.map(function(item) { return item.newRating; });
+    var allRatings = ratings.concat(sorted.map(function(item) { return item.oldRating; })).filter(function(v) { return v != null; });
+    var minR = Math.min.apply(null, allRatings);
+    var maxR = Math.max.apply(null, allRatings);
+    var yMin = Math.max(0, Math.floor(minR / 100) * 100 - 200);
+    var yMax = Math.ceil(maxR / 100) * 100 + 200;
+
+    // Find min/max indices
+    var minIdx = ratings.indexOf(minR);
+    var maxIdx = ratings.indexOf(maxR);
+    if (minIdx === -1) minIdx = 0;
+    if (maxIdx === -1) maxIdx = ratings.length - 1;
+
+    var handleColor = D.color || getRatingColor(D.rating);
+
+    // Build scatter data with individual point colors
+    var scatterData = sorted.map(function(item, i) {
+      return {
+        value: [formatDate(item.time), item.newRating],
+        itemStyle: { color: getRatingColor(item.newRating) },
+        symbolSize: 6
+      };
+    });
+
+    var option = {
+      backgroundColor: 'transparent',
+      tooltip: {
+        trigger: 'axis',
+        backgroundColor: 'rgba(20,20,40,0.95)',
+        borderColor: 'rgba(255,255,255,0.12)',
+        textStyle: { color: '#e0e0e0', fontFamily: 'Consolas, monospace', fontSize: 12 },
+        formatter: function(params) {
+          var p = params[0];
+          if (!p) return '';
+          var idx = p.dataIndex;
+          var item = sorted[idx];
+          var change = item.newRating - item.oldRating;
+          var sign = change >= 0 ? '+' : '';
+          var chgColor = change >= 0 ? '#00c853' : '#ff1744';
+          return '<b>' + item.contestName + '</b><br/>'
+            + 'Date: ' + formatDate(item.time) + '<br/>'
+            + 'Rank: ' + item.rank + '<br/>'
+            + 'Old: ' + item.oldRating + ' &rarr; New: ' + item.newRating + '<br/>'
+            + '<span style="color:' + chgColor + ';font-weight:700;">' + sign + change + '</span>'
+            + (item.points != null ? ' | Points: ' + item.points : '');
+        }
+      },
+      grid: { left: 50, right: 24, top: 30, bottom: 40 },
+      xAxis: {
+        type: 'category',
+        data: dates,
+        axisLine: { lineStyle: { color: 'rgba(255,255,255,0.12)' } },
+        axisTick: { show: false },
+        axisLabel: {
+          color: '#888',
+          fontSize: 10,
+          fontFamily: 'Consolas, monospace',
+          rotate: dates.length > 15 ? 45 : 0
+        },
+        splitLine: { show: false }
+      },
+      yAxis: {
+        type: 'value',
+        min: yMin,
+        max: yMax,
+        axisLine: { show: false },
+        axisTick: { show: false },
+        axisLabel: { color: '#888', fontSize: 11, fontFamily: 'Consolas, monospace', margin: 8 },
+        splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)', type: 'dashed' } }
+      },
+      series: [
+        {
+          type: 'line',
+          data: sorted.map(function(item) { return [formatDate(item.time), item.newRating]; }),
+          smooth: true,
+          symbol: 'none',
+          lineStyle: {
+            width: 2.5,
+            color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+              { offset: 0, color: getRatingColor(sorted[0] ? sorted[0].newRating : 0) },
+              { offset: 1, color: handleColor }
+            ])
+          },
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: 'rgba(' + hexToRgb(handleColor).r + ',' + hexToRgb(handleColor).g + ',' + hexToRgb(handleColor).b + ',0.2)' },
+              { offset: 1, color: 'rgba(0,0,0,0)' }
+            ])
+          },
+          z: 1
+        },
+        {
+          type: 'scatter',
+          data: scatterData,
+          symbolSize: 7,
+          z: 2
+        },
+        {
+          type: 'scatter',
+          data: [{ value: [dates[maxIdx], maxR], name: 'Max' }],
+          symbolSize: 16,
+          symbol: 'pin',
+          itemStyle: { color: '#FFD700' },
+          label: { show: true, formatter: 'Max: ' + maxR, color: '#FFD700', fontSize: 11, position: 'top', distance: 10 },
+          z: 3
+        },
+        {
+          type: 'scatter',
+          data: [{ value: [dates[minIdx], minR], name: 'Min' }],
+          symbolSize: 14,
+          symbol: 'pin',
+          itemStyle: { color: '#66bb6a' },
+          label: { show: true, formatter: 'Min: ' + minR, color: '#66bb6a', fontSize: 11, position: 'bottom', distance: 10 },
+          z: 3
+        }
+      ]
+    };
+
+    var chart = echarts.init(chartDom);
+    chart.setOption(option);
+
+    window.addEventListener('resize', function() { chart.resize(); });
+  }
+
+  // ---- Render Table ----
+  function renderTable() {
+    var history = D.ratingHistory || [];
+    var tbody = document.getElementById('table-body');
+    var emptyEl = document.getElementById('table-empty');
+
+    if (!history.length) {
+      tbody.innerHTML = '';
+      emptyEl.style.display = 'block';
+      return;
+    }
+    emptyEl.style.display = 'none';
+
+    // Sort newest first
+    var sorted = history.slice().sort(function(a, b) { return b.time - a.time; });
+
+    var rows = '';
+    for (var i = 0; i < sorted.length; i++) {
+      var item = sorted[i];
+      var change = item.newRating - item.oldRating;
+      var sign = change >= 0 ? '+' : '';
+      var chgClass = change >= 0 ? 'change-positive' : 'change-negative';
+
+      // Build problem badges (with score)
+      var problemCells = '';
+      if (item.problems && item.problems.length) {
+        for (var j = 0; j < item.problems.length; j++) {
+          var p = item.problems[j];
+          var cls = p.attempts === 0 ? 'empty' : (p.bestTime != null && p.bestTime != -1 ? 'solved' : 'failed');
+          var pts = (p.points != null) ? Math.round(p.points * 10) / 10 : 0;
+          var tip = p.index + ' | pts: ' + pts;
+          if (p.attempts > 0) tip += ' | attempts: ' + p.attempts;
+          if (p.bestTime != null && p.bestTime != -1) tip += ' | time: ' + Math.abs(p.bestTime) + 's';
+          problemCells += '<span class="problem-badge ' + cls + '" title="' + tip + '">'
+            + '<span>' + p.index + '</span>'
+            + (pts > 0 ? '<span class="badge-score">' + pts + '</span>' : '')
+            + '</span>';
+        }
+      }
+
+      // Upsolved (as styled badges)
+      var upsolvedHtml = '';
+      if (item.upsolved && item.upsolved.length) {
+        upsolvedHtml = '<span class="upsolved-list">';
+        for (var u = 0; u < item.upsolved.length; u++) {
+          upsolvedHtml += '<span class="upsolved-badge" title="Upsolved after contest: ' + item.upsolved[u] + '">' + item.upsolved[u] + '</span>';
+        }
+        upsolvedHtml += '</span>';
+      } else {
+        upsolvedHtml = '<span class="upsolved-none">&mdash;</span>';
+      }
+
+      rows += '<tr>'
+        + '<td>' + formatDate(item.time) + '</td>'
+        + '<td class="contest-name-cell">' + escapeHtml(item.contestName || '') + '</td>'
+        + '<td><span class="rank-badge">' + (item.rank != null ? '#' + item.rank : '&mdash;') + '</span></td>'
+        + '<td>' + (item.oldRating != null ? item.oldRating : '&mdash;') + '</td>'
+        + '<td>' + (item.newRating != null ? item.newRating : '&mdash;') + '</td>'
+        + '<td class="' + chgClass + '">' + sign + change + '</td>'
+        + '<td><div class="problem-badges">' + problemCells + '</div></td>'
+        + '<td>' + upsolvedHtml + '</td>'
+        + '</tr>';
+    }
+    tbody.innerHTML = rows;
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  // ---- Histogram ----
+  var histogramChart = null;
+  var histogramPeriod = 0;
+
+  function renderHistogram(period) {
+    if (typeof period === 'number') histogramPeriod = period;
+    var p = histogramPeriod;
+
+    /* 检查数据是否存在 */
+    if (!D.histogram || !D.histogram.periods || !D.histogram.periods[p] || !D.histogram.periods[p].data) {
+      var empty = document.getElementById('histogram-empty');
+      var container = document.getElementById('histogram-container');
+      if (empty) empty.style.display = 'block';
+      if (container) container.style.display = 'none';
+      return;
+    }
+
+    document.getElementById('histogram-empty').style.display = 'none';
+    document.getElementById('histogram-container').style.display = 'block';
+
+    var labels = D.histogram.labels;
+    var data = D.histogram.periods[p].data;
+
+    if (!histogramChart) {
+      histogramChart = echarts.init(document.getElementById('histogram-container'));
+    }
+
+    var option = {
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' },
+        backgroundColor: 'rgba(26,26,46,0.95)',
+        borderColor: 'rgba(255,255,255,0.1)',
+        textStyle: { color: '#e0e0e0' },
+        formatter: function(pr) {
+          return pr[0].name + '<br/>Solved: <b>' + pr[0].value + '</b> problem(s)';
+        }
+      },
+      grid: { left: 50, right: 20, top: 10, bottom: 50 },
+      xAxis: {
+        type: 'category',
+        data: labels,
+        axisLabel: { color: '#888', fontSize: 10, rotate: 45, interval: Math.max(0, Math.floor(labels.length / 15) - 1) },
+        axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } }
+      },
+      yAxis: {
+        type: 'value',
+        name: 'Solved',
+        nameTextStyle: { color: '#888' },
+        axisLabel: { color: '#888' },
+        splitLine: { lineStyle: { color: 'rgba(255,255,255,0.04)' } },
+        minInterval: 1
+      },
+      series: [{
+        type: 'bar',
+        data: data,
+        itemStyle: {
+          borderRadius: [3, 3, 0, 0],
+          color: function(pr) {
+            var r = D.histogram.min + pr.dataIndex * D.histogram.step;
+            return getRatingColor(r);
+          }
+        },
+        emphasis: {
+          itemStyle: { color: '#ff4757' }
+        }
+      }]
+    };
+
+    histogramChart.setOption(option, true);
+  }
+
+  function onHistogramTabClick(e) {
+    var tab = e.target.closest('.histogram-tab');
+    if (!tab) return;
+    var period = parseInt(tab.getAttribute('data-period'));
+    if (isNaN(period)) return;
+
+    /* 更新 tab 选中状态 */
+    document.querySelectorAll('.histogram-tab').forEach(function(t) {
+      t.classList.remove('active');
+    });
+    tab.classList.add('active');
+
+    renderHistogram(period);
+  }
+
+  // ---- Footer timestamp ----
+  function renderFooter() {
+    var tsEl = document.getElementById('footer-ts');
+    var now = new Date();
+    tsEl.textContent = 'Data loaded: ' + now.toISOString().replace('T', ' ').split('.')[0];
+  }
+
+  // ---- Init ----
+  function init() {
+    renderUserCard();
+    renderStats();
+    renderChart();
+    renderHistogram();
+    renderTable();
+    renderFooter();
+
+    /* 直方图 tab 切换 */
+    var tabs = document.getElementById('histogram-tabs');
+    if (tabs) tabs.addEventListener('click', onHistogramTabClick);
+
+    /* 窗口 resize 时重绘图表 */
+    window.addEventListener('resize', function() {
+      if (histogramChart) histogramChart.resize();
+      var chartDom = document.getElementById('chart-container');
+      if (chartDom) {
+        var instance = echarts.getInstanceByDom(chartDom);
+        if (instance) instance.resize();
+      }
+    });
+  }
+
+  // Run on DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>

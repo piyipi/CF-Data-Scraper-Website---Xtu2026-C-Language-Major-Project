@@ -1,0 +1,269 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 880" font-family="Microsoft YaHei, SimHei, sans-serif">
+  <defs>
+    <marker id="arrowFill" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#e74c3c"/>
+    </marker>
+    <marker id="arrowData" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#3498db"/>
+    </marker>
+    <marker id="arrowOut" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#27ae60"/>
+    </marker>
+    <linearGradient id="gradTitle" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+    <linearGradient id="gradInput" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2c3e50"/>
+      <stop offset="100%" style="stop-color:#1a252f"/>
+    </linearGradient>
+    <linearGradient id="gradEntry" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#8e44ad"/>
+      <stop offset="100%" style="stop-color:#6c3483"/>
+    </linearGradient>
+    <linearGradient id="gradAnalyzer" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#e74c3c"/>
+      <stop offset="100%" style="stop-color:#c0392b"/>
+    </linearGradient>
+    <linearGradient id="gradAPI" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#2980b9"/>
+      <stop offset="100%" style="stop-color:#1f6dad"/>
+    </linearGradient>
+    <linearGradient id="gradHTTP" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#27ae60"/>
+      <stop offset="100%" style="stop-color:#1e8449"/>
+    </linearGradient>
+    <linearGradient id="gradJSON" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f39c12"/>
+      <stop offset="100%" style="stop-color:#d68910"/>
+    </linearGradient>
+    <linearGradient id="gradOutput" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#16a085"/>
+      <stop offset="100%" style="stop-color:#0e6655"/>
+    </linearGradient>
+    <linearGradient id="gradWeb" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#d35400"/>
+      <stop offset="100%" style="stop-color:#a04000"/>
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%">
+      <feDropShadow dx="2" dy="3" stdDeviation="3" flood-opacity="0.25"/>
+    </filter>
+    <filter id="shadowLight" x="-3%" y="-3%" width="106%" height="110%">
+      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- 背景 -->
+  <rect width="1200" height="880" fill="#f8f9fa" rx="8"/>
+
+  <!-- 标题栏 -->
+  <rect x="0" y="0" width="1200" height="52" fill="url(#gradTitle)" rx="8"/>
+  <rect x="0" y="42" width="1200" height="10" fill="url(#gradTitle)"/>
+  <text x="600" y="33" text-anchor="middle" fill="white" font-size="20" font-weight="bold">Codeforces Rating Crawler — 模块数据流图</text>
+
+  <!-- ======================== 第7层：main.c 入口层 ======================== -->
+  <rect x="20" y="70" width="1160" height="100" fill="none" stroke="#8e44ad" stroke-width="1.5" stroke-dasharray="6,3" rx="6"/>
+  <text x="32" y="90" fill="#8e44ad" font-size="12" font-weight="bold">第7层 ─ main.c 入口调度层</text>
+
+  <!-- main.c 模块 -->
+  <rect x="350" y="100" width="500" height="52" fill="url(#gradEntry)" rx="8" filter="url(#shadow)"/>
+  <text x="600" y="123" text-anchor="middle" fill="white" font-size="16" font-weight="bold">main.c — 入口 / 模式判断 / 流程编排</text>
+  <text x="600" y="142" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="11">命令行解析 → 单用户 / 多用户 / 文件模式分派</text>
+
+  <!-- 输入 -->
+  <rect x="100" y="108" width="180" height="36" fill="url(#gradInput)" rx="18" filter="url(#shadowLight)"/>
+  <text x="190" y="131" text-anchor="middle" fill="#ecf0f1" font-size="13" font-weight="bold">👤 用户输入</text>
+  <line x1="280" y1="126" x2="345" y2="126" stroke="#e74c3c" stroke-width="2" marker-end="url(#arrowFill)"/>
+
+  <!-- users.txt 输入 -->
+  <rect x="100" y="155" width="180" height="30" fill="url(#gradInput)" rx="15" filter="url(#shadowLight)" opacity="0.7"/>
+  <text x="190" y="175" text-anchor="middle" fill="#bdc3c7" font-size="11">📄 users.txt （批量）</text>
+  <line x1="280" y1="170" x2="345" y2="140" stroke="#e74c3c" stroke-width="1.5" marker-end="url(#arrowFill)" stroke-dasharray="5,3"/>
+
+  <!-- template.html 输入 -->
+  <rect x="30" y="205" width="160" height="30" fill="#d35400" rx="6" filter="url(#shadowLight)"/>
+  <text x="110" y="225" text-anchor="middle" fill="white" font-size="11">📋 web/template.html</text>
+  <line x1="190" y1="220" x2="345" y2="155" stroke="#e74c3c" stroke-width="1.5" marker-end="url(#arrowFill)" stroke-dasharray="5,3"/>
+
+  <!-- ======================== 第6层：analyzer 分析层 ======================== -->
+  <rect x="20" y="190" width="1160" height="220" fill="none" stroke="#e74c3c" stroke-width="1.5" stroke-dasharray="6,3" rx="6"/>
+  <text x="32" y="210" fill="#e74c3c" font-size="12" font-weight="bold">第6层 ─ analyzer.c 数据分析与导出层</text>
+
+  <!-- analyzer 主函数 -->
+  <rect x="380" y="225" width="440" height="52" fill="url(#gradAnalyzer)" rx="8" filter="url(#shadow)"/>
+  <text x="600" y="246" text-anchor="middle" fill="white" font-size="15" font-weight="bold">analyzer.c — analyze_user() 核心分析函数</text>
+  <text x="600" y="266" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="11">信息聚合 ◇ 补题匹配 ◇ 近180天统计 ◇ 难度直方图</text>
+
+  <!-- 从 main 到 analyzer -->
+  <line x1="600" y1="152" x2="600" y2="222" stroke="#e74c3c" stroke-width="2.5" marker-end="url(#arrowFill)"/>
+  <text x="615" y="190" fill="#e74c3c" font-size="11" font-weight="bold">analyze_user() × N</text>
+
+  <!-- 数据模型 -->
+  <rect x="180" y="240" width="150" height="36" fill="#2c3e50" rx="8" filter="url(#shadowLight)"/>
+  <text x="255" y="262" text-anchor="middle" fill="#ecf0f1" font-size="12" font-weight="bold">data_model.h</text>
+  <line x1="330" y1="258" x2="375" y2="258" stroke="#7f8c8d" stroke-width="1.5" marker-end="url(#arrowData)"/>
+  <text x="352" y="252" fill="#7f8c8d" font-size="9">类型定义</text>
+
+  <!-- 工具函数 -->
+  <rect x="180" y="290" width="150" height="36" fill="#2c3e50" rx="8" filter="url(#shadowLight)"/>
+  <text x="255" y="312" text-anchor="middle" fill="#ecf0f1" font-size="12" font-weight="bold">utils.h/c</text>
+  <line x1="330" y1="308" x2="375" y2="270" stroke="#7f8c8d" stroke-width="1.5" marker-end="url(#arrowData)"/>
+  <text x="352" y="293" fill="#7f8c8d" font-size="9">颜色/日期</text>
+
+  <!-- export_data_js -->
+  <rect x="380" y="295" width="440" height="36" fill="#c0392b" rx="8" filter="url(#shadowLight)"/>
+  <text x="600" y="318" text-anchor="middle" fill="white" font-size="13" font-weight="bold">export_data_js() — fprintf 拼接 → JavaScript 变量文件</text>
+
+  <!-- analyzer → export -->
+  <line x1="600" y1="277" x2="600" y2="292" stroke="#e74c3c" stroke-width="2" marker-end="url(#arrowFill)"/>
+
+  <!-- ======================== 第5层：cf_api 层 ======================== -->
+  <rect x="20" y="430" width="1160" height="120" fill="none" stroke="#2980b9" stroke-width="1.5" stroke-dasharray="6,3" rx="6"/>
+  <text x="32" y="450" fill="#2980b9" font-size="12" font-weight="bold">第5层 ─ cf_api.c Codeforces API 调用层</text>
+
+  <!-- cf_api 四个接口 -->
+  <rect x="120" y="465" width="200" height="36" fill="url(#gradAPI)" rx="8" filter="url(#shadowLight)"/>
+  <text x="220" y="487" text-anchor="middle" fill="white" font-size="12" font-weight="bold">cf_get_user_info()</text>
+  <text x="220" y="498" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">user.info 接口</text>
+
+  <rect x="360" y="465" width="200" height="36" fill="url(#gradAPI)" rx="8" filter="url(#shadowLight)"/>
+  <text x="460" y="487" text-anchor="middle" fill="white" font-size="12" font-weight="bold">cf_get_user_ratings()</text>
+  <text x="460" y="498" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">user.rating 接口</text>
+
+  <rect x="600" y="465" width="200" height="36" fill="url(#gradAPI)" rx="8" filter="url(#shadowLight)"/>
+  <text x="700" y="487" text-anchor="middle" fill="white" font-size="12" font-weight="bold">cf_get_user_status()</text>
+  <text x="700" y="498" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">user.status 接口（200条）</text>
+
+  <rect x="840" y="465" width="200" height="36" fill="url(#gradAPI)" rx="8" filter="url(#shadowLight)" opacity="0.6"/>
+  <text x="940" y="487" text-anchor="middle" fill="white" font-size="12" font-weight="bold">cf_get_contest_list()</text>
+  <text x="940" y="498" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="9">contest.list 接口（备用）</text>
+
+  <!-- api_get 内部统一函数 -->
+  <rect x="300" y="510" width="460" height="30" fill="#1a5276" rx="6"/>
+  <text x="530" y="530" text-anchor="middle" fill="#85c1e9" font-size="11">内部统一函数：api_get(method, params) → URL组装 + HTTP请求 + JSON解析 + 状态校验</text>
+
+  <!-- analyzer 到 cf_api -->
+  <line x1="440" y1="331" x2="220" y2="462" stroke="#3498db" stroke-width="1.8" marker-end="url(#arrowData)"/>
+  <line x1="600" y1="331" x2="460" y2="462" stroke="#3498db" stroke-width="1.8" marker-end="url(#arrowData)"/>
+  <line x1="760" y1="331" x2="700" y2="462" stroke="#3498db" stroke-width="1.8" marker-end="url(#arrowData)"/>
+  <text x="330" y="400" fill="#2980b9" font-size="10">UserInfo</text>
+  <text x="560" y="400" fill="#2980b9" font-size="10">ContestRecord[]</text>
+  <text x="770" y="400" fill="#2980b9" font-size="10">cJSON* root</text>
+
+  <!-- ======================== 第2层：http_client + 第1层：cJSON ======================== -->
+  <rect x="20" y="570" width="1160" height="130" fill="none" stroke="#27ae60" stroke-width="1.5" stroke-dasharray="6,3" rx="6"/>
+  <text x="32" y="590" fill="#27ae60" font-size="12" font-weight="bold">第1-2层 ─ http_client.c + cJSON 网络通信 &amp; JSON解析</text>
+
+  <!-- http_client -->
+  <rect x="120" y="605" width="280" height="36" fill="url(#gradHTTP)" rx="8" filter="url(#shadowLight)"/>
+  <text x="260" y="628" text-anchor="middle" fill="white" font-size="13" font-weight="bold">http_client.c — libcurl 封装</text>
+
+  <!-- http_init / http_get / http_cleanup -->
+  <rect x="120" y="648" width="88" height="24" fill="#1e8449" rx="5"/>
+  <text x="164" y="664" text-anchor="middle" fill="white" font-size="10">http_init()</text>
+  <rect x="216" y="648" width="88" height="24" fill="#1e8449" rx="5"/>
+  <text x="260" y="664" text-anchor="middle" fill="white" font-size="10">http_get()</text>
+  <rect x="312" y="648" width="88" height="24" fill="#1e8449" rx="5"/>
+  <text x="356" y="664" text-anchor="middle" fill="white" font-size="10">cleanup()</text>
+
+  <!-- cJSON -->
+  <rect x="500" y="605" width="280" height="36" fill="url(#gradJSON)" rx="8" filter="url(#shadowLight)"/>
+  <text x="640" y="628" text-anchor="middle" fill="white" font-size="13" font-weight="bold">cJSON.c — JSON 解析库 （第三方 v1.7.18）</text>
+
+  <rect x="500" y="648" width="130" height="24" fill="#d68910" rx="5"/>
+  <text x="565" y="664" text-anchor="middle" fill="white" font-size="10">cJSON_Parse()</text>
+  <rect x="638" y="648" width="142" height="24" fill="#d68910" rx="5"/>
+  <text x="709" y="664" text-anchor="middle" fill="white" font-size="10">GetObjectItem/GetArrayItem</text>
+
+  <!-- cf_api → http_client -->
+  <line x1="400" y1="483" x2="260" y2="602" stroke="#27ae60" stroke-width="2" marker-end="url(#arrowData)"/>
+  <text x="300" y="555" fill="#27ae60" font-size="10">URL GET</text>
+
+  <!-- http_client → cJSON -->
+  <line x1="400" y1="623" x2="496" y2="623" stroke="#f39c12" stroke-width="2" marker-end="url(#arrowData)"/>
+  <text x="448" y="616" fill="#f39c12" font-size="10">JSON 文本</text>
+
+  <!-- cf_api → cJSON -->
+  <line x1="700" y1="555" x2="640" y2="602" stroke="#f39c12" stroke-width="1.5" marker-end="url(#arrowData)"/>
+  <text x="740" y="580" fill="#f39c12" font-size="10">解析调用</text>
+
+  <!-- ======================== Codeforces API 外部 ======================== -->
+  <rect x="120" y="715" width="400" height="36" fill="#1a252f" rx="8" stroke="#5dade2" stroke-width="1.5" filter="url(#shadowLight)"/>
+  <text x="320" y="738" text-anchor="middle" fill="#5dade2" font-size="14" font-weight="bold">🌐 Codeforces API</text>
+  <text x="320" y="749" text-anchor="middle" fill="#5dade2" font-size="9">https://codeforces.com/api/</text>
+
+  <!-- http_client → CF API -->
+  <line x1="260" y1="684" x2="260" y2="712" stroke="#5dade2" stroke-width="2" marker-end="url(#arrowData)"/>
+  <text x="275" y="700" fill="#5dade2" font-size="10">HTTPS GET</text>
+
+  <!-- 响应回传 -->
+  <line x1="380" y1="733" x2="380" y2="684" stroke="#3498db" stroke-width="2" marker-end="url(#arrowData)"/>
+  <text x="395" y="712" fill="#3498db" font-size="10">JSON 响应</text>
+
+  <!-- ======================== 输出层 ======================== -->
+  <rect x="840" y="70" width="320" height="340" fill="none" stroke="#16a085" stroke-width="1.5" stroke-dasharray="6,3" rx="6"/>
+  <text x="852" y="88" fill="#16a085" font-size="12" font-weight="bold">输出产物（output/ 目录）</text>
+
+  <!-- 单用户输出 -->
+  <rect x="858" y="100" width="284" height="52" fill="url(#gradOutput)" rx="8" filter="url(#shadowLight)"/>
+  <text x="1000" y="120" text-anchor="middle" fill="white" font-size="12" font-weight="bold">单用户模式</text>
+  <text x="1000" y="136" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="10">data.js + index.html</text>
+
+  <!-- 多用户输出 -->
+  <rect x="858" y="162" width="284" height="52" fill="url(#gradOutput)" rx="8" filter="url(#shadowLight)"/>
+  <text x="1000" y="182" text-anchor="middle" fill="white" font-size="12" font-weight="bold">多用户模式</text>
+  <text x="1000" y="198" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="10">{handle}_data.js + {handle}.html + index.html</text>
+
+  <!-- 前端页面 -->
+  <rect x="858" y="225" width="284" height="52" fill="url(#gradWeb)" rx="8" filter="url(#shadowLight)"/>
+  <text x="1000" y="245" text-anchor="middle" fill="white" font-size="12" font-weight="bold">前端渲染</text>
+  <text x="1000" y="261" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="10">ECharts 图表 + 暗色主题 + 交互表格</text>
+
+  <!-- 数据流到输出 -->
+  <line x1="820" y1="126" x2="854" y2="126" stroke="#16a085" stroke-width="2" marker-end="url(#arrowOut)"/>
+  <text x="835" y="120" fill="#16a085" font-size="9">单用户</text>
+  <line x1="820" y1="175" x2="854" y2="175" stroke="#16a085" stroke-width="2" marker-end="url(#arrowOut)"/>
+  <text x="835" y="169" fill="#16a085" font-size="9">多用户</text>
+
+  <!-- export_data_js → output -->
+  <line x1="820" y1="313" x2="854" y2="240" stroke="#16a085" stroke-width="2" marker-end="url(#arrowOut)"/>
+
+  <!-- main → template 复制 -->
+  <line x1="850" y1="145" x2="854" y2="145" stroke="#d35400" stroke-width="2" marker-end="url(#arrowOut)"/>
+  <text x="840" y="140" fill="#d35400" font-size="9">复制</text>
+
+  <!-- ======================== 图例 ======================== -->
+  <rect x="20" y="775" width="1160" height="90" fill="none" stroke="#bdc3c7" stroke-width="1" rx="6"/>
+  <text x="32" y="795" fill="#555" font-size="12" font-weight="bold">图例</text>
+
+  <line x1="50" y1="815" x2="110" y2="815" stroke="#e74c3c" stroke-width="2.5" marker-end="url(#arrowFill)"/>
+  <text x="120" y="820" fill="#555" font-size="11">控制流 / 函数调用</text>
+
+  <line x1="250" y1="815" x2="310" y2="815" stroke="#3498db" stroke-width="2" marker-end="url(#arrowData)"/>
+  <text x="320" y="820" fill="#555" font-size="11">数据流（结构体传递）</text>
+
+  <line x1="450" y1="815" x2="510" y2="815" stroke="#16a085" stroke-width="2" marker-end="url(#arrowOut)"/>
+  <text x="520" y="820" fill="#555" font-size="11">输出 / 文件写入</text>
+
+  <line x1="650" y1="815" x2="710" y2="815" stroke="#7f8c8d" stroke-width="1.5" marker-end="url(#arrowData)"/>
+  <text x="720" y="820" fill="#555" font-size="11">类型定义 / 工具引用</text>
+
+  <line x1="850" y1="815" x2="910" y2="815" stroke="#7f8c8d" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="920" y="820" fill="#555" font-size="11">备选 / 间接</text>
+
+  <rect x="50" y="840" width="16" height="12" fill="url(#gradEntry)" rx="3"/>
+  <text x="72" y="851" fill="#555" font-size="10">入口/调度</text>
+  <rect x="150" y="840" width="16" height="12" fill="url(#gradAnalyzer)" rx="3"/>
+  <text x="172" y="851" fill="#555" font-size="10">分析/导出</text>
+  <rect x="260" y="840" width="16" height="12" fill="url(#gradAPI)" rx="3"/>
+  <text x="282" y="851" fill="#555" font-size="10">API调用</text>
+  <rect x="370" y="840" width="16" height="12" fill="url(#gradHTTP)" rx="3"/>
+  <text x="392" y="851" fill="#555" font-size="10">HTTP通信</text>
+  <rect x="480" y="840" width="16" height="12" fill="url(#gradJSON)" rx="3"/>
+  <text x="502" y="851" fill="#555" font-size="10">JSON解析</text>
+  <rect x="590" y="840" width="16" height="12" fill="url(#gradOutput)" rx="3"/>
+  <text x="612" y="851" fill="#555" font-size="10">输出产物</text>
+  <rect x="700" y="840" width="16" height="12" fill="url(#gradWeb)" rx="3"/>
+  <text x="722" y="851" fill="#555" font-size="10">前端页面</text>
+
+</svg>
